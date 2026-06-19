@@ -1,0 +1,38 @@
+{
+  "name": "trashdb",
+  "version": "0.1.0",
+  "description": "Official Node.js SDK for TrashDB — ephemeral database containers on demand",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean"
+  },
+  "keywords": [
+    "trashdb",
+    "ephemeral",
+    "database",
+    "docker",
+    "chromadb",
+    "qdrant",
+    "redis",
+    "postgres"
+  ],
+  "author": "statefalse",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.0.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}
