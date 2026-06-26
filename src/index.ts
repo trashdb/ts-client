@@ -28,7 +28,7 @@ export class TrashDB {
     this.maxRetries = options.maxRetries ?? 3;
     this.initialBackoffMs = options.initialBackoffMs ?? 500;
     this.fetchImpl = options.fetch ?? fetch;
-    this.baseUrl = (options.baseUrl ?? "http://localhost:5000/api/v1").replace(
+    this.baseUrl = (options.baseUrl ?? "https://api.trashdb.dev/api/v1").replace(
       /\/$/,
       "",
     );

@@ -1,0 +1,29 @@
+{
+  "name": "trashdb-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "CLI tool demonstrating @trashdb/ts SDK — manage ephemeral database containers",
+  "bin": {
+    "trashdb-cli": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --clean",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@trashdb/ts": "file:../..",
+    "dotenv": "^16.4.7",
+    "pg": "^8.13.0",
+    "ioredis": "^5.4.1",
+    "mongodb": "^6.8.1"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.3",
+    "@types/node": "^26.0.0",
+    "@types/pg": "^8.11.0"
+  }
+}

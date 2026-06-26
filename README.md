@@ -25,7 +25,7 @@ const db = new TrashDB({ apiKey: 'trdb_...' });
 
 const container = await db.createContainer({ engine: 'postgres', ttlMinutes: 10 });
 console.log(container.connectionString);
-// → postgresql://postgres:...@localhost:49823/postgres
+// → postgresql://postgres:...@hosted.trashdb.dev:49823/postgres
 ```
 
 ### Real-world example: integration tests with Vitest
@@ -102,7 +102,7 @@ const container = await db.createContainer({
   name: 'my-test-db',
 });
 console.log(container.connectionString);
-// → http://localhost:49823
+// → http://hosted.trashdb.dev:49823
 
 // List running containers
 const containers = await db.getRunningContainers();
@@ -122,7 +122,7 @@ const engines = await db.getEngines();
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `apiKey` | `string` | (required) | Your TrashDB API key (`trdb_...`) |
-| `baseUrl` | `string` | `http://localhost:5000/api/v1` | API base URL. In production use `https://api.trashdb.dev/api/v1` |
+| `baseUrl` | `string` | `https://api.trashdb.dev/api/v1` | API base URL |
 | `maxRetries` | `number` | `3` | Max retries on transient errors (502/503/504) |
 | `initialBackoffMs` | `number` | `500` | Initial backoff in ms; doubles each retry |
 | `fetch` | `typeof fetch` | `globalThis.fetch` | Custom fetch implementation (e.g. for proxies or tests) |

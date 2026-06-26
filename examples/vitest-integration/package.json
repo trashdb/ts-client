@@ -1,0 +1,21 @@
+{
+  "name": "trashdb-vitest-integration",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Integration test example using @trashdb/ts with Vitest",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@trashdb/ts": "file:../..",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0",
+    "typescript": "^5.9.3",
+    "@types/node": "^26.0.0",
+    "@types/pg": "^8.11.0"
+  }
+}
