@@ -14,49 +14,30 @@ export type {
   TrashDBError,
 };
 
-/**
- * Official TrashDB Node.js SDK.
- *
- * @example
- * ```ts
- * import { TrashDB } from 'trashdb';
- *
- * const db = new TrashDB({ apiKey: 'your-api-key' });
- *
- * const container = await db.createContainer({
- *   engine: 'chromadb',
- *   ttlMinutes: 5,
- *   name: 'My test DB',
- * });
- *
- * console.log(container.connectionString);
- * // → http://localhost:49823
- * ```
- */
+const RETRYABLE_STATUSES = new Set([502, 503, 504]);
+
 export class TrashDB {
   private readonly baseUrl: string;
   private readonly apiKey: string;
+  private readonly maxRetries: number;
+  private readonly initialBackoffMs: number;
+  private readonly fetchImpl: typeof fetch;
 
   constructor(options: TrashDBOptions) {
     this.apiKey = options.apiKey;
-    // Default to localhost for development.
-    // In production, pass your deployed API URL, e.g. 'https://api.trashdb.dev/api/v1'
+    this.maxRetries = options.maxRetries ?? 3;
+    this.initialBackoffMs = options.initialBackoffMs ?? 500;
+    this.fetchImpl = options.fetch ?? fetch;
     this.baseUrl = (options.baseUrl ?? "http://localhost:5000/api/v1").replace(
       /\/$/,
-      ""
+      "",
     );
   }
 
-  // ── Containers ───────────────────────────────────────────────────────────
-
-  /**
-   * Create an ephemeral database container.
-   * @returns The created container details including its connection string.
-   */
-  async createContainer(
-    params: CreateContainerParams
+  createContainer(
+    params: CreateContainerParams,
   ): Promise<ContainerResponse> {
-    const res = await fetch(`${this.baseUrl}/containers`, {
+    return this.request<ContainerResponse>(`${this.baseUrl}/containers`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -68,58 +49,35 @@ export class TrashDB {
         name: params.name,
       }),
     });
-
-    if (!res.ok) {
-      const error: TrashDBError = await res.json();
-      throw new TrashDBAPIError(res.status, error);
-    }
-
-    return res.json();
   }
 
-  /**
-   * List all running (not yet destroyed) containers for the authenticated tenant.
-   */
-  async getRunningContainers(): Promise<ContainerResponse[]> {
-    const res = await fetch(`${this.baseUrl}/containers`, {
+  getRunningContainers(): Promise<ContainerResponse[]> {
+    return this.request<ContainerResponse[]>(`${this.baseUrl}/containers`, {
       headers: { "x-api-key": this.apiKey },
     });
-
-    if (!res.ok) {
-      const error: TrashDBError = await res.json();
-      throw new TrashDBAPIError(res.status, error);
-    }
-
-    return res.json();
   }
 
-  /**
-   * Destroy a running container immediately.
-   * @returns `true` if the container was destroyed.
-   */
   async destroyContainer(containerId: string): Promise<boolean> {
-    const res = await fetch(`${this.baseUrl}/containers/${containerId}`, {
-      method: "DELETE",
-      headers: { "x-api-key": this.apiKey },
-    });
+    const res = await this.rawRequest(
+      `${this.baseUrl}/containers/${containerId}`,
+      { method: "DELETE", headers: { "x-api-key": this.apiKey } },
+    );
 
-    if (res.status === 204) return true;
+    if (res.ok) return true;
 
-    if (!res.ok) {
-      const error: TrashDBError = await res.json();
-      throw new TrashDBAPIError(res.status, error);
-    }
-
-    return true;
+    const error: TrashDBError = await res.json();
+    throw new TrashDBAPIError(res.status, error);
   }
 
-  // ── Engines ──────────────────────────────────────────────────────────────
+  getEngines(): Promise<EngineInfo[]> {
+    return this.request<EngineInfo[]>(`${this.baseUrl}/engines`);
+  }
 
-  /**
-   * List all supported database engines (public, no auth required).
-   */
-  async getEngines(): Promise<EngineInfo[]> {
-    const res = await fetch(`${this.baseUrl}/engines`);
+  private async request<T>(
+    url: string,
+    init?: RequestInit,
+  ): Promise<T> {
+    const res = await this.rawRequest(url, init);
 
     if (!res.ok) {
       const error: TrashDBError = await res.json();
@@ -127,10 +85,37 @@ export class TrashDB {
     }
 
     return res.json();
+  }
+
+  private async rawRequest(
+    url: string,
+    init?: RequestInit,
+  ): Promise<Response> {
+    const maxAttempts = Math.max(1, this.maxRetries + 1);
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const res = await this.fetchImpl(url, init);
+
+        if (attempt === maxAttempts || !RETRYABLE_STATUSES.has(res.status))
+          return res;
+
+        await this.sleep(attempt);
+      } catch (err) {
+        if (attempt === maxAttempts) throw err;
+
+        await this.sleep(attempt);
+      }
+    }
+
+    throw new Error("Unreachable");
+  }
+
+  private async sleep(attempt: number): Promise<void> {
+    const delay = this.initialBackoffMs * Math.pow(2, attempt - 1);
+    await new Promise((r) => setTimeout(r, delay));
   }
 }
-
-// ── Error class ────────────────────────────────────────────────────────────
 
 export class TrashDBAPIError extends Error {
   readonly status: number;
@@ -143,4 +128,3 @@ export class TrashDBAPIError extends Error {
     this.code = error.code;
   }
 }
-
