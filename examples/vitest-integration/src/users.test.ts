@@ -1,6 +1,7 @@
 import { TrashDB, TrashDBAPIError } from "@trashdb/ts";
 import pg from "pg";
 import { beforeAll, afterAll, describe, it, expect } from "vitest";
+import {ContainerResponse} from "../../../src";
 
 const db = new TrashDB({
   apiKey: process.env.TRASHDB_API_KEY!,
@@ -8,9 +9,10 @@ const db = new TrashDB({
 });
 
 let connectionString: string;
+let container: ContainerResponse;
 
 beforeAll(async () => {
-  const container = await db.createContainer({
+  container = await db.createContainer({
     engine: "postgres",
     ttlMinutes: 15,
     name: "vitest-integration-test",
@@ -19,12 +21,7 @@ beforeAll(async () => {
 }, 30_000);
 
 afterAll(async () => {
-  if (connectionString) {
-    const client = new pg.Client({ connectionString });
-    await client.connect();
-    await client.query("DROP TABLE IF EXISTS users");
-    await client.end();
-  }
+  await db.destroyContainer(container.id);
 });
 
 describe("User repository with disposable Postgres", () => {
