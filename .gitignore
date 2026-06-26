@@ -13,6 +13,9 @@ pnpm-debug.log*
 
 # Environment files
 .env
+
+# Local guides
+RELEASE-GUIDE.md
 .env.*
 !.env.example
 

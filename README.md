@@ -25,7 +25,7 @@ const db = new TrashDB({ apiKey: 'trdb_...' });
 
 const container = await db.createContainer({ engine: 'postgres', ttlMinutes: 10 });
 console.log(container.connectionString);
-// → postgresql://postgres:...@hosted.trashdb.dev:49823/postgres
+// → postgresql://postgres:...@api.trashdb.dev:32768/postgres
 ```
 
 ### Real-world example: integration tests with Vitest
@@ -102,7 +102,7 @@ const container = await db.createContainer({
   name: 'my-test-db',
 });
 console.log(container.connectionString);
-// → http://hosted.trashdb.dev:49823
+// → http://api.trashdb.dev:32768
 
 // List running containers
 const containers = await db.getRunningContainers();
