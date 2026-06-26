@@ -1,6 +1,6 @@
 {
   "name": "@trashdb/ts",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Official Node.js SDK for TrashDB — ephemeral database containers on demand",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
