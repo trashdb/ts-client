@@ -16,6 +16,7 @@ pnpm-debug.log*
 
 # Local guides
 RELEASE-GUIDE.md
+NEXT-STEPS.md
 .env.*
 !.env.example
 

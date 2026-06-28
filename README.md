@@ -64,31 +64,28 @@ test('create and find a user', async () => {
 
 ### Real-world example: CI pipeline (GitHub Actions)
 
+Use the official `trashdb/run-tests` action — it creates a container, injects
+`DATABASE_URL` into the environment, runs your tests, and cleans up:
+
 ```yaml
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - run: npm ci
-      - run: npm test
-        env:
-          TRASHDB_API_KEY: ${{ secrets.TRASHDB_API_KEY }}
+      - uses: trashdb/run-tests@v1
+        with:
+          api-key: ${{ secrets.TRASHDB_API_KEY }}
+          engine: postgres
+          run: npm test
 ```
 
-```ts
-// test-setup.ts — runs before the test suite
-import { TrashDB } from '@trashdb/ts';
-
-const db = new TrashDB({ apiKey: process.env.TRASHDB_API_KEY! });
-
-export async function setupDatabase() {
-  const container = await db.createContainer({ engine: 'postgres', ttlMinutes: 15 });
-  process.env.DATABASE_URL = container.connectionString;
-  // Run your migrations
-  await import('./migrate');
-}
-```
+Your tests use `process.env.DATABASE_URL` as usual — no SDK imports, no
+connection string handling, no cleanup code. The action handles everything.
 
 ```ts
 import { TrashDB } from '@trashdb/ts';

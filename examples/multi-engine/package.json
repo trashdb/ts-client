@@ -1,0 +1,26 @@
+{
+  "name": "trashdb-multi-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TrashDB integration examples for all supported engines",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@trashdb/ts": "file:../..",
+    "dotenv": "^16.4.7",
+    "pg": "^8.13.0",
+    "ioredis": "^5.4.1",
+    "mongodb": "^6.8.1",
+    "chromadb": "^1.10.0",
+    "@qdrant/js-client-rest": "^1.12.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0",
+    "typescript": "^5.9.3",
+    "@types/node": "^26.0.0",
+    "@types/pg": "^8.11.0"
+  }
+}
